@@ -11,6 +11,9 @@
 |
 */
 
+use App\Events\UpdateOrderStatus;
+
 Route::get('/', function () {
+    UpdateOrderStatus::dispatch();
     return view('welcome');
 });
