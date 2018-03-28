@@ -11,7 +11,9 @@
 |
 */
 
+use App\Events\TaskCreated;
 use App\Events\UpdateOrderStatus;
+use App\Task;
 
 class Order {
 
@@ -27,8 +29,19 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-Route::get('/update', function () {
-    UpdateOrderStatus::dispatch(new Order(1));
+Route::get('/tasks', function () {
+    return Task::all()->pluck('body');
 });
+
+Route::post('/tasks', function () {
+    $task = Task::forceCreate(request(['body']));
+
+    TaskCreated::dispatch($task);
+});
+
+
+
+//Route::get('/update', function () {
+//    UpdateOrderStatus::dispatch(new Order(1));
+//});
 

@@ -54,8 +54,3 @@ window.Echo = new Echo({
     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
     encrypted: true
 });
-
-window.Echo.channel('orders').listen('UpdateOrderStatus', (e) => {
-    console.log('Order with id ' + e.order.id + ' was updated behind the scenes');
-    console.log(e);
-});
