@@ -15,33 +15,37 @@ use App\Events\TaskCreated;
 use App\Events\UpdateOrderStatus;
 use App\Task;
 
-class Order {
+//class Order {
+//
+//    public $id;
+//
+//    public function __construct($id)
+//    {
+//        $this->id = $id;
+//    }
+//}
 
-    public $id;
-
-    public function __construct($id)
-    {
-        $this->id = $id;
-    }
-}
-
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/tasks', function () {
-    return Task::all()->pluck('body');
-});
-
-Route::post('/tasks', function () {
-    $task = Task::forceCreate(request(['body']));
-
-    TaskCreated::dispatch($task);
-});
+Route::get('/', 'HomeController@index')->name('home');
+Route::get('/projects/{project}', 'ProjectsController@show')->name('projects.show');
 
 
-
-//Route::get('/update', function () {
-//    UpdateOrderStatus::dispatch(new Order(1));
+//Route::get('/tasks', function () {
+//    return Task::all()->pluck('body');
 //});
+//
+//Route::post('/tasks', function () {
+//    $task = Task::forceCreate(request(['body']));
+//
+//    TaskCreated::dispatch($task);
+//});
+//
+//
+//
+////Route::get('/update', function () {
+////    UpdateOrderStatus::dispatch(new Order(1));
+////});
+//
+//
+Auth::routes();
+//
 

@@ -1,15 +1,23 @@
 <template>
     <div>
-        <ul>
-            <li v-for="task in tasks" v-text="task"></li>
+        <ul class="list-group mb-3">
+            <li class="list-group-item" v-for="task in tasks" v-text="task.title"></li>
         </ul>
 
-        <input type="text" v-model="newTask" @blur="addTask">
+        <form @submit.prevent="addTask">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" v-model="newTask" placeholder="Add new task...">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Add</button>
+                </div>
+            </div>
+        </form>
     </div>
 </template>
 
 <script>
     export default {
+        props: ['project'],
         data() {
             return {
                 tasks: [],
@@ -17,18 +25,18 @@
             }
         },
         created() {
-            axios.get('/tasks').then((response) => {this.tasks = response.data});
+            axios.get(`/api/projects/${this.project.id}/tasks`).then((response) => {this.tasks = response.data});
 
-            window.Echo.channel('tasks').listen('TaskCreated', ({task}) => {
-                this.tasks.push(task.body);
+            window.Echo.channel(`tasks.${this.project.id}`).listen('TaskCreated', ({task}) => {
+                this.tasks.push(task);
             });
-
         },
         methods: {
             addTask() {
-                axios.post('/tasks', {body: this.newTask});
-                this.tasks.push(this.newTask);
-                this.newTask = '';
+                axios.post(`/api/projects/${this.project.id}/tasks`, {title: this.newTask}).then((response) => {
+                    this.tasks.push(response.data);
+                    this.newTask = '';
+                });
             }
         }
     }
