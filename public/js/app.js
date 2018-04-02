@@ -52386,14 +52386,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['project'],
     data: function data() {
         return {
             tasks: [],
-            newTask: ''
+            newTask: '',
+            activePeer: false,
+            activePeerTimeout: ''
         };
+    },
+
+    computed: {
+        channel: function channel() {
+            return window.Echo.private('tasks.' + this.project.id);
+        }
     },
     created: function created() {
         var _this = this;
@@ -52402,21 +52411,38 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             _this.tasks = response.data;
         });
 
-        window.Echo.private('tasks.' + this.project.id).listen('TaskCreated', function (_ref) {
+        this.channel.listen('TaskCreated', function (_ref) {
             var task = _ref.task;
 
             _this.tasks.push(task);
+            _this.activePeer = false;
         });
+
+        this.channel.listenForWhisper('typing', this.peerTyping);
     },
 
     methods: {
-        addTask: function addTask() {
+        peerTyping: function peerTyping(e) {
             var _this2 = this;
 
+            this.activePeer = e;
+
+            if (this.activePeerTimeout) clearTimeout(this.activePeerTimeout);
+
+            this.activePeerTimeout = setTimeout(function () {
+                _this2.activePeer = false;
+            }, 3000);
+        },
+        addTask: function addTask() {
+            var _this3 = this;
+
             axios.post('/api/projects/' + this.project.id + '/tasks', { title: this.newTask }).then(function (response) {
-                _this2.tasks.push(response.data);
-                _this2.newTask = '';
+                _this3.tasks.push(response.data);
+                _this3.newTask = '';
             });
+        },
+        notifyPeers: function notifyPeers() {
+            this.channel.whisper('typing', { name: window.App.user.name });
         }
     }
 });
@@ -52430,6 +52456,14 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
+    _vm.activePeer
+      ? _c("p", {
+          domProps: {
+            textContent: _vm._s(_vm.activePeer.name + " is typing...")
+          }
+        })
+      : _vm._e(),
+    _vm._v(" "),
     _c(
       "ul",
       { staticClass: "list-group mb-3" },
@@ -52466,6 +52500,7 @@ var render = function() {
             attrs: { type: "text", placeholder: "Add new task..." },
             domProps: { value: _vm.newTask },
             on: {
+              keypress: _vm.notifyPeers,
               input: function($event) {
                 if ($event.target.composing) {
                   return
