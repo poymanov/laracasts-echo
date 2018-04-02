@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -33,6 +32,6 @@ class TaskCreated implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel("tasks.{$this->task->project_id}");
+        return new PresenceChannel("tasks.{$this->task->project_id}");
     }
 }

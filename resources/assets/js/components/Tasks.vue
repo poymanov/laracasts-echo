@@ -1,18 +1,30 @@
 <template>
-    <div>
-        <p v-if="activePeer" v-text="activePeer.name + ' is typing...'"></p>
-        <ul class="list-group mb-3">
-            <li class="list-group-item" v-for="task in tasks" v-text="task.title"></li>
-        </ul>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h2 class="mb-4" v-text="project.name"></h2>
+                <p v-if="activePeer" v-text="activePeer.name + ' is typing...'"></p>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item" v-for="task in tasks" v-text="task.title"></li>
+                </ul>
 
-        <form @submit.prevent="addTask">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" v-model="newTask" placeholder="Add new task..." @keypress="notifyPeers">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">Add</button>
-                </div>
+                <form @submit.prevent="addTask">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" v-model="newTask" placeholder="Add new task..." @keypress="notifyPeers">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="submit">Add</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+            <div class="col-md-4">
+                <h2 class="mb-4">Active participants</h2>
+
+                <ul class="list-group mb-3">
+                    <li class="list-group-item" v-for="user in users" v-text="user.name"></li>
+                </ul>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -24,18 +36,26 @@
                 tasks: [],
                 newTask: '',
                 activePeer: false,
-                activePeerTimeout: ''
+                activePeerTimeout: '',
+                users: []
             }
         },
         computed: {
             channel() {
-                return window.Echo.private(`tasks.${this.project.id}`);
+                return window.Echo.join(`tasks.${this.project.id}`);
             }
         },
         created() {
             axios.get(`/api/projects/${this.project.id}/tasks`).then((response) => {this.tasks = response.data});
 
-            this.channel.listen('TaskCreated', ({task}) => {
+            this.channel.here((e) => {
+                this.users = e;
+            }
+            ).joining((e) => {
+                this.users.push(e);
+            }).leaving((e) => {
+                this.users.splice(this.users.indexOf(e), 1);
+            }).listen('TaskCreated', ({task}) => {
                 this.tasks.push(task);
                 this.activePeer = false;
             });

@@ -52387,6 +52387,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['project'],
@@ -52395,13 +52407,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             tasks: [],
             newTask: '',
             activePeer: false,
-            activePeerTimeout: ''
+            activePeerTimeout: '',
+            users: []
         };
     },
 
     computed: {
         channel: function channel() {
-            return window.Echo.private('tasks.' + this.project.id);
+            return window.Echo.join('tasks.' + this.project.id);
         }
     },
     created: function created() {
@@ -52411,7 +52424,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             _this.tasks = response.data;
         });
 
-        this.channel.listen('TaskCreated', function (_ref) {
+        this.channel.here(function (e) {
+            _this.users = e;
+        }).joining(function (e) {
+            _this.users.push(e);
+        }).leaving(function (e) {
+            _this.users.splice(_this.users.indexOf(e), 1);
+        }).listen('TaskCreated', function (_ref) {
             var task = _ref.task;
 
             _this.tasks.push(task);
@@ -52455,65 +52474,89 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _vm.activePeer
-      ? _c("p", {
-          domProps: {
-            textContent: _vm._s(_vm.activePeer.name + " is typing...")
-          }
-        })
-      : _vm._e(),
-    _vm._v(" "),
-    _c(
-      "ul",
-      { staticClass: "list-group mb-3" },
-      _vm._l(_vm.tasks, function(task) {
-        return _c("li", {
-          staticClass: "list-group-item",
-          domProps: { textContent: _vm._s(task.title) }
-        })
-      })
-    ),
-    _vm._v(" "),
-    _c(
-      "form",
-      {
-        on: {
-          submit: function($event) {
-            $event.preventDefault()
-            return _vm.addTask($event)
-          }
-        }
-      },
-      [
-        _c("div", { staticClass: "input-group mb-3" }, [
-          _c("input", {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.newTask,
-                expression: "newTask"
+  return _c("div", { staticClass: "container" }, [
+    _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-md-8" }, [
+        _c("h2", {
+          staticClass: "mb-4",
+          domProps: { textContent: _vm._s(_vm.project.name) }
+        }),
+        _vm._v(" "),
+        _vm.activePeer
+          ? _c("p", {
+              domProps: {
+                textContent: _vm._s(_vm.activePeer.name + " is typing...")
               }
-            ],
-            staticClass: "form-control",
-            attrs: { type: "text", placeholder: "Add new task..." },
-            domProps: { value: _vm.newTask },
+            })
+          : _vm._e(),
+        _vm._v(" "),
+        _c(
+          "ul",
+          { staticClass: "list-group mb-3" },
+          _vm._l(_vm.tasks, function(task) {
+            return _c("li", {
+              staticClass: "list-group-item",
+              domProps: { textContent: _vm._s(task.title) }
+            })
+          })
+        ),
+        _vm._v(" "),
+        _c(
+          "form",
+          {
             on: {
-              keypress: _vm.notifyPeers,
-              input: function($event) {
-                if ($event.target.composing) {
-                  return
-                }
-                _vm.newTask = $event.target.value
+              submit: function($event) {
+                $event.preventDefault()
+                return _vm.addTask($event)
               }
             }
-          }),
-          _vm._v(" "),
-          _vm._m(0)
-        ])
-      ]
-    )
+          },
+          [
+            _c("div", { staticClass: "input-group mb-3" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.newTask,
+                    expression: "newTask"
+                  }
+                ],
+                staticClass: "form-control",
+                attrs: { type: "text", placeholder: "Add new task..." },
+                domProps: { value: _vm.newTask },
+                on: {
+                  keypress: _vm.notifyPeers,
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.newTask = $event.target.value
+                  }
+                }
+              }),
+              _vm._v(" "),
+              _vm._m(0)
+            ])
+          ]
+        )
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-4" }, [
+        _c("h2", { staticClass: "mb-4" }, [_vm._v("Active participants")]),
+        _vm._v(" "),
+        _c(
+          "ul",
+          { staticClass: "list-group mb-3" },
+          _vm._l(_vm.users, function(user) {
+            return _c("li", {
+              staticClass: "list-group-item",
+              domProps: { textContent: _vm._s(user.name) }
+            })
+          })
+        )
+      ])
+    ])
   ])
 }
 var staticRenderFns = [
