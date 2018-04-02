@@ -52402,7 +52402,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             _this.tasks = response.data;
         });
 
-        window.Echo.channel('tasks.' + this.project.id).listen('TaskCreated', function (_ref) {
+        window.Echo.private('tasks.' + this.project.id).listen('TaskCreated', function (_ref) {
             var task = _ref.task;
 
             _this.tasks.push(task);

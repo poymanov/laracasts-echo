@@ -27,7 +27,9 @@
         created() {
             axios.get(`/api/projects/${this.project.id}/tasks`).then((response) => {this.tasks = response.data});
 
-            window.Echo.channel(`tasks.${this.project.id}`).listen('TaskCreated', ({task}) => {
+
+
+            window.Echo.private(`tasks.${this.project.id}`).listen('TaskCreated', ({task}) => {
                 this.tasks.push(task);
             });
         },

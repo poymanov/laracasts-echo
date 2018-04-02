@@ -23,4 +23,8 @@ class Project extends Model
         return $task;
     }
 
+    public function participants()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }
